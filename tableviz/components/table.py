@@ -82,7 +82,7 @@ class Table:
                         }
                 elif isinstance(val, (Dict, List, Tuple)):
                     row_data[key] = {
-                        'value': f'<pre>{yaml.dump(val, indent=2, allow_unicode=True, default_flow_style=False)}</pre>',
+                        'value': f'<pre style="white-space: pre-wrap">{yaml.dump(val, indent=2, allow_unicode=True, default_flow_style=False)}</pre>',
                         'dtype': 'object'
                     }
                 elif isinstance(val, numbers.Number):
