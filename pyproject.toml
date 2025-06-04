@@ -9,6 +9,7 @@ include-package-data = true
 # Or be explicit about what to include
 [tool.setuptools.packages.find]
 where = ["."]
+exclude = ["test*", "tests*"]  # Excludes both 'test/' and 'tests/' folders
 
 [tool.setuptools.package-data]
 "*" = ['*']
@@ -28,7 +29,8 @@ dependencies = [  # Add your dependencies here
     "Jinja2",
     "Pillow",
     "numpy",
-    "rich"
+    "rich",
+    "pyyaml"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

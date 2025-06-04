@@ -7,6 +7,13 @@ TableViz is a Python project that provides tools for organizing and visualizing 
 1. **TableData**: Organizes raw Python data structures (dicts and lists of dicts) into a structured table format
 2. **Table**: Renders the structured TableData into HTML for display in web pages
 
+Supported data types:
+- number (integer, float)
+- string
+- PIL image
+- python dict
+- python list/tuple
+
 ## Features
 
 - Convert Python dictionaries and lists of dictionaries into structured table data
@@ -26,24 +33,27 @@ pip install tableviz
 
 ```python
 from tableviz import TableData, Table
+from PIL import Image
 
-# Create from a list of dictionaries
+# Raw data in python list
 data = [
-    {"name": "Alice", "age": 25, "department": "Engineering"},
-    {"name": "Bob", "age": 30, "department": "Marketing"},
-    {"name": "Charlie", "age": 28, "department": "Sales"}
+    {"name": "Alice", "age": 25, "department": "Engineering", "avatar": Image.open('alice.jpg')},
+    {"name": "Bob", "age": 30, "department": "Marketing", "avatar": Image.open('bob.jpg')},
+    {"name": "Charlie", "age": 28, "department": "Sales", "avatar": Image.open('charlie.jpg')}
 ]
 
-# Organize the data
+# Create TableData and Table
 table_data = TableData(data)
+table = Table(table_data, save_dir='./test')
 
-# Render to HTML
-table = Table(table_data)
-html_output = table.render()
+# Get HTML page in string format
+html = table.get_html()
 
-# Save or display the HTML
-with open("output.html", "w") as f:
-    f.write(html_output)
+# Save HTML to './test/index.html'
+table.save()
+
+# Serve the HTML page on http://0.0.0.0:8000
+table.serve(host='0.0.0.0', port=8000)
 ```
 
 ## Requirements
@@ -51,6 +61,7 @@ with open("output.html", "w") as f:
 - Python 3.6+
 - jinjia2
 - Pillow
+- rich
 
 ## License
 

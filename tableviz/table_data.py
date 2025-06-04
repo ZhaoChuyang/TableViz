@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Tuple
 import collections
 from PIL import Image
 import numbers
@@ -89,7 +89,7 @@ class TableData:
         """
         for col in self.keys:
             for value in self.data[col]:
-                if isinstance(value, (numbers.Number, str, Image.Image)):
+                if isinstance(value, (numbers.Number, str, Image.Image, Dict, List, Tuple)):
                     continue
                 else:
                     raise ValueError(f"Unsupported data type in column '{col}': {type(value)}")

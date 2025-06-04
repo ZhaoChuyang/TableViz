@@ -1,6 +1,6 @@
 import os
 import datetime
-from typing import Optional, Literal
+from typing import Optional, Literal, Dict, Tuple, List
 from pathlib import Path
 import contextlib
 import socket
@@ -10,6 +10,7 @@ from PIL import Image
 import numbers
 from rich.console import Console
 from rich.panel import Panel
+import yaml
 from ..table_data import TableData
 from ..utils import encode_base64_image, resize_longest_edge
 
@@ -79,6 +80,11 @@ class Table:
                             'value': '[Image]',
                             'dtype': 'str'
                         }
+                elif isinstance(val, (Dict, List, Tuple)):
+                    row_data[key] = {
+                        'value': f'<pre>{yaml.dump(val, indent=2, default_flow_style=False)}</pre>',
+                        'dtype': 'object'
+                    }
                 elif isinstance(val, numbers.Number):
                     row_data[key] = {'dtype': 'number'}
                     if isinstance(val, numbers.Integral):

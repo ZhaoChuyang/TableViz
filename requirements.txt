@@ -2,3 +2,4 @@ Pillow
 jinjia
 numpy
 rich
+pyyaml
