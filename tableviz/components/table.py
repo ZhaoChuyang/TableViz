@@ -2,9 +2,14 @@ import os
 import datetime
 from typing import Optional, Literal
 from pathlib import Path
+import contextlib
+import socket
+from http.server import SimpleHTTPRequestHandler, HTTPServer, ThreadingHTTPServer
 from jinja2 import Environment, FileSystemLoader
 from PIL import Image
 import numbers
+from rich.console import Console
+from rich.panel import Panel
 from ..table_data import TableData
 from ..utils import encode_base64_image, resize_longest_edge
 
@@ -38,12 +43,13 @@ class Table:
         self.save_dir = save_dir
         self.env = Environment(loader=FileSystemLoader(TEMPLATE_DIR))
         self.template = self.env.get_template('index.html')
+        self.console = None
     
     def setup_data(self, data: TableData):
         """Setup the table with the given data."""
         self.data = data
 
-    def render(self) -> str:
+    def get_html(self) -> str:
         """Render the table as a HTML string"""
         #===============
         # Process rows
@@ -97,9 +103,42 @@ class Table:
             display_index=self.display_index,
         )
     
-    def save(self):
+    def save_html(self):
         """Save the rendered table to a html file"""
-        html = self.render()
+        html = self.get_html()
         with open(os.path.join(self.save_dir, 'index.html'), 'w') as f:
             f.write(html)
         
+        print(f"HTML file saved to {os.path.join(self.save_dir, 'index.html')}")
+    
+    def serve(self, host: str = "0.0.0.0", port: int = 8000):
+        self.save_html()
+        os.chdir(self.save_dir)
+
+        self.console = Console()
+        self.console.print(Panel.fit(
+            f"[bold magenta]Server Info[/bold magenta]\n"
+            f"[bold]Directory:[/bold] {Path(self.save_dir).resolve()}\n"
+            f"[bold]Host:[/bold] {host}\n"
+            f"[bold]Port:[/bold] {port}\n"
+            f"[bold]URL:[/bold] http://{host}:{port}",
+            title="🌐 HTTP Server Running", border_style="green"
+        ))
+        
+        class DualStackServer(ThreadingHTTPServer):
+
+            def server_bind(self):
+                # suppress exception when protocol is IPv4
+                with contextlib.suppress(Exception):
+                    self.socket.setsockopt(
+                        socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+                return super().server_bind()
+
+        # with HTTPServer((host, port), SimpleHTTPRequestHandler) as httpd:
+        with DualStackServer((host, port), SimpleHTTPRequestHandler) as httpd:
+            try:
+                self.console.log(f"[cyan]Serving HTTP on {host} port {port} (http://{host}:{port}) ... Press Ctrl+C to stop.[/cyan]")
+                httpd.serve_forever()
+            except KeyboardInterrupt:
+                self.console.print("[yellow]Shutting down server...[/yellow]")
+                
